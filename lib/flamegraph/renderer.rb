@@ -39,6 +39,7 @@ class Flamegraph::Renderer
       begin
         table = []
         prev = []
+        prev_parent = []
 
         # a 2d array makes collapsing easy
         @stacks.each_with_index do |stack, pos|
@@ -47,11 +48,16 @@ class Flamegraph::Renderer
 
           col = []
 
-          stack.reverse.map{|r| r.to_s}.each_with_index do |frame, i|
+          reversed_stack = stack.reverse
+          reversed_stack.map{|r| r.to_s}.each_with_index do |frame, i|
+            parent_frame = i > 0 ? reversed_stack[i - 1] : nil
 
             if !prev[i].nil?
               last_col = prev[i]
-              if last_col[0] == frame
+              frame_match = last_col[0] == frame
+              parent_match = parent_frame.nil? || prev_parent[i].nil? || parent_frame == prev_parent[i]
+
+              if frame_match && parent_match
                 last_col[1] += 1
                 col << nil
                 next
@@ -59,6 +65,7 @@ class Flamegraph::Renderer
             end
 
             prev[i] = [frame, 1]
+            prev_parent[i] = parent_frame
             col << prev[i]
           end
           prev = prev[0..col.length-1].to_a
