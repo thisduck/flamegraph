@@ -5,5 +5,5 @@ gemspec
 
 # both are optional, depending on platform
 gem 'fast_stack'
-gem 'stackprof', platform: [:mri_21, :mri_22, :mri_23]
+gem 'stackprof', platform: [:mri_21, :mri_22, :mri_23, :mri_24]
 

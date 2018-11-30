@@ -16,4 +16,6 @@ test/tmp
 test/version_tmp
 tmp
 *.swp
-demo/graph.html
+demo/graph*.html
+demo/data.json
+tags
