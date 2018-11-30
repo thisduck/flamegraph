@@ -89,6 +89,100 @@ var data = null;
 var maxX = 0;
 var maxY = 0;
 
+class Node {
+  constructor({id, data}) {
+    this._data = data;
+    this.id = id;
+  }
+
+  get x() {
+    return this._data.x;
+  }
+
+  get y() {
+    return this._data.y;
+  }
+
+  get width() {
+    return this._data.width;
+  }
+
+  get frame() {
+    return this._data.frame;
+  }
+
+  get gem() {
+    var frame = this.frame;
+    var split = frame.split('/gems/');
+    if(split.length == 1) {
+      split = frame.split('/app/');
+      if(split.length == 1) {
+        split = frame.split('/lib/');
+      }
+
+      split = split[Math.max(split.length-2,0)].split('/');
+      return split[split.length-1].split(':')[0];
+    } else {
+      return split[split.length -1].split('/')[0];
+    }
+  }
+
+  get method() {
+    var frame = this.frame;
+    var split = frame.split('`');
+    if(split.length == 2) {
+      var fullMethod = split[1].split("'")[0];
+      split = fullMethod.split("#");
+      if(split.length == 2) {
+        return split[1];
+      }
+      return split[0];
+    }
+    return '?';
+  }
+
+  get file() {
+    var frame = this.frame;
+    var split = frame.split(".rb:");
+    if(split.length == 2) {
+      split = split[0].split('/');
+      return split[split.length - 1];
+    }
+    return "";
+  }
+
+  backtrace(nodes) {
+    for(var i = 0; i < nodes.length; i++){
+      if(this === nodes[i]){ break; }
+    }
+
+    var trace = [this];
+    var depth = this.y;
+
+    while(i > 0){
+      if(depth == -1) break;
+
+      if(nodes[i].y === depth - 1) {
+        trace.push(nodes[i]);
+        depth--;
+      }
+
+      i--;
+    }
+
+    return trace;
+  }
+};
+
+var nodes = [];
+
+for(var i = 0; i < data.length; i++) {
+  var node = new Node({id: i, data: data[i]})
+  nodes.push(node);
+}
+
+data = null;
+
 debounce = function(func, wait, trickle) {
   var timeout;
 
@@ -122,51 +216,9 @@ debounce = function(func, wait, trickle) {
   };
 };
 
-
-var guessGem = function(frame)
-{
-  var split = frame.split('/gems/');
-  if(split.length == 1) {
-    split = frame.split('/app/');
-    if(split.length == 1) {
-      split = frame.split('/lib/');
-    }
-
-    split = split[Math.max(split.length-2,0)].split('/');
-    return split[split.length-1].split(':')[0];
-  }
-  else
-  {
-    return split[split.length -1].split('/')[0];
-  }
-}
-
-var guessMethod = function(frame) {
-  var split = frame.split('`');
-  if(split.length == 2) {
-    var fullMethod = split[1].split("'")[0];
-    split = fullMethod.split("#");
-    if(split.length == 2) {
-      return split[1];
-    }
-    return split[0];
-  }
-  return '?';
-}
-
-var guessFile = function(frame) {
-  var split = frame.split(".rb:");
-  if(split.length == 2) {
-    split = split[0].split('/');
-    return split[split.length - 1];
-  }
-  return "";
-}
-
-$.each(data, function(){
+$.each(nodes, function(){
    maxX = Math.max(maxX, this.x + this.width);
    maxY = Math.max(maxY, this.y);
-   this.shortName = guessMethod(this.frame);
 });
 
 var width = $(window).width();
@@ -285,25 +337,6 @@ var getGemNodes = function(gem_name) {
 };
 
 var backtrace = function(frame){
-  for(var i=0; i<data.length; i++){
-    if(frame === data[i]){ break; }
-  }
-
-  frames = [frame];
-  var depth = frame.y;
-
-  while(i > 0){
-    if(depth == -1) break;
-
-    if(data[i].y === depth-1) {
-      frames.push(data[i]);
-      depth--;
-    }
-
-    i--;
-  }
-
-  return frames;
 }
 
 $('#frameinfo-wrapper').click(function(d){
@@ -321,7 +354,7 @@ var click = function(d){
       return;
   }
 
-  var trace = backtrace(d);
+  var trace = d.backtrace(nodes);
 
   var link = function(path, dest){
     return path.replace(/[^\/]+:\d+/, function(x){ return "<a target='_blank' href='"+ dest +"'>" + x + "</a>"})
@@ -401,9 +434,9 @@ var gemStats = {}
 var topFrames = {}
 var lastFrame = {frame: 'd52e04d-df28-41ed-a215-b6ec840a8ea5', x: -1}
 
-$.each(data, function(){
+$.each(nodes, function(){
   var by_method = location.search.match(/[?&]by_method=1\b/);
-  var group = by_method ? guessMethod(this.frame) : guessGem(this.frame);
+  var group = by_method ? this.method : this.gem;
 
   var stat = gemStats[group];
 
@@ -482,7 +515,7 @@ function fontSize(d,i) {
 }
 
 svg.selectAll("g")
-	.data(data)
+	.data(nodes)
 	.enter()
     .append("g")
     .each(function(){
