@@ -74,7 +74,18 @@
   </div>
   <script>
 
-var data = /**DATA**/;
+var data = null;
+<% if ENV['TEST'] %>
+  $.ajax({
+    url: './<%= ENV['FILE'] || 'data.json' %>',
+    async: false,
+    success: function(response) {
+      data = JSON.parse(response);
+    }
+  });
+<% else %>
+  data = /**DATA**/;
+<% end %>
 var maxX = 0;
 var maxY = 0;
 

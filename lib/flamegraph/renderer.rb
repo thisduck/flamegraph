@@ -1,5 +1,6 @@
 # inspired by https://github.com/brendangregg/FlameGraph
 require 'base64'
+require 'erb'
 
 class Flamegraph::Renderer
   def initialize(stacks)
@@ -7,7 +8,7 @@ class Flamegraph::Renderer
   end
 
   def graph_html(embed_resources)
-    body = read('flamegraph.html')
+    body = ERB.new(read('flamegraph.html.erb')).result
     body.sub! "/**INCLUDES**/",
       if embed_resources
         embed("jquery.min.js","d3.min.js","lodash.min.js")
