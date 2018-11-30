@@ -9,16 +9,8 @@ class Flamegraph::Renderer
 
   def graph_html(embed_resources)
     body = ERB.new(read('flamegraph.html.erb')).result
-    body.sub! "/**INCLUDES**/",
-      if embed_resources
-        embed("jquery.min.js","d3.min.js","lodash.min.js")
-      else
-        '<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js"></script>'
-      end
-
-    body.sub!("/**DATA**/", ::JSON.generate(graph_data));
+    body.sub!('/**INCLUDES**/', includes(embed_resources))
+    body.sub!('/**DATA**/', ::JSON.generate(graph_data))
     body
   end
 
@@ -81,13 +73,38 @@ class Flamegraph::Renderer
 
   private
 
-  def embed(*files)
-    out = ""
-    files.each do |file|
-      body = read(file)
-      out << "<script src='data:text/javascript;base64," << Base64.encode64(body) << "'></script>"
-    end
-    out
+  def include_files
+    [
+      'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js'
+    ]
+  end
+
+  def includes(embed_resources)
+    include_files.map do |file|
+      if embed_resources
+        embed(file)
+      else
+        link(file)
+      end
+    end.join("\n")
+  end
+
+  def embed(file)
+    file = file.split('/').last
+    body = read(file)
+    return "<script src='data:text/javascript;base64,#{Base64.encode64(body)}'></script>" if file =~ /\.js$/
+    return "<link rel='stylesheet' href='data:text/css;base64,#{Base64.encode64(body)}' />" if file =~ /\.css$/
+
+    ''
+  end
+
+  def link(file)
+    return "<script src='#{file}'></script>" if file =~ /\.js$/
+    return "<link rel='stylesheet' href='#{file}' />" if file =~ /\.css$/
+
+    ''
   end
 
   def read(file)
