@@ -58,6 +58,8 @@ http://samsaffron.github.io/flamegraph/rails-startup.html
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+3. Make your changes
+4. Run the tests (`bundle exec ruby -Ilib:test -e 'ARGV.each { |f| require f }' ./test/test*.rb`)
+5. Commit your changes (`git commit -am 'Add some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create new Pull Request
