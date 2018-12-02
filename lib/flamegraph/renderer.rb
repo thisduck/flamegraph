@@ -8,7 +8,7 @@ class Flamegraph::Renderer
   end
 
   def graph_html(embed_resources)
-    body = ERB.new(read('flamegraph.html.erb')).result
+    body = ERB.new(read('ui/flamegraph.html.erb')).result
     body.sub!('/**INCLUDES**/', includes(embed_resources))
     body.sub!('/**DATA**/', ::JSON.generate(graph_data))
     body
@@ -93,7 +93,7 @@ class Flamegraph::Renderer
 
   def embed(file)
     file = file.split('/').last
-    body = read(file)
+    body = read("ui/vendor/#{ file }")
     return "<script src='data:text/javascript;base64,#{Base64.encode64(body)}'></script>" if file =~ /\.js$/
     return "<link rel='stylesheet' href='data:text/css;base64,#{Base64.encode64(body)}' />" if file =~ /\.css$/
 
