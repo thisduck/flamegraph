@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8 />
+
+    <title>Flame Graph of Page</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      .info {min-height: 50px; margin: 10px; }
+      .legend div {
+        display: block;
+        float: left;
+        width: 150px;
+        margin: 0 8px 8px;
+        padding: 4px;
+        height: 50px;
+      }
+      .code {
+        font-family: Consolas, Menlo, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
+      }
+      #frameinfo table .sample-info {
+        width: 200px;
+        color: #333;
+        font-size: 12px;
+      }
+      #frameinfo table {
+        border-collapse: collapse;
+      }
+      #frameinfo table tr {
+        border-bottom: 1px solid #eee;
+        margin-top: 5px;
+      }
+      #frameinfo td {
+        padding: 5px;
+      }
+      #frameinfo-wrapper {
+        position: fixed;
+        z-index: 1;
+        opacity: 0.7;
+        background-color: black;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: none;
+      }
+      #frameinfo {
+        position: fixed;
+        padding: 10px;
+        z-index: 2;
+        opacity: 1.0;
+        top: 0;
+        margin-top: 50px;
+        margin-left: 40px;
+        width: 80%;
+        height: 80%;
+        background-color: white;
+        border: 2px solid #666;
+        display: none;
+        overflow: auto;
+      }
+    </style>
+
+  </head>
+<body>
+  <div class="graph"></div>
+  <div class="info code"></div>
+  <div class="legend"></div>
+  <div id="frameinfo-wrapper"></div>
+  <div id="frameinfo">
+    <h3>Frame Info</h3>
+    <table>
+    </table>
+  </div>
+  <script>
+    window.data = [];
+    /**DATA**/
+
+  </script>
+
+
+
+<script type="text/javascript" src="main.js"></script></body>
+</html>

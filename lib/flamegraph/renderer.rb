@@ -1,6 +1,5 @@
 # inspired by https://github.com/brendangregg/FlameGraph
 require 'base64'
-require 'erb'
 
 class Flamegraph::Renderer
   def initialize(stacks)
@@ -8,9 +7,9 @@ class Flamegraph::Renderer
   end
 
   def graph_html(embed_resources)
-    body = ERB.new(read('ui/flamegraph.html.erb')).result
-    body.sub!('/**INCLUDES**/', includes(embed_resources))
-    body.sub!('/**DATA**/', ::JSON.generate(graph_data))
+    body = read('ui/dist/index.html')
+    body.sub!('<script type="text/javascript" src="main.js"></script>', includes(embed_resources))
+    body.sub!('/**DATA**/', "window.data = #{::JSON.generate(graph_data)};")
     body
   end
 
@@ -75,9 +74,10 @@ class Flamegraph::Renderer
 
   def include_files
     [
-      'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js'
+      'main.js',
+      # 'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+      # 'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js',
+      # 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/1.3.1/lodash.min.js'
     ]
   end
 
@@ -93,7 +93,7 @@ class Flamegraph::Renderer
 
   def embed(file)
     file = file.split('/').last
-    body = read("ui/vendor/#{ file }")
+    body = read("ui/dist/#{ file }")
     return "<script src='data:text/javascript;base64,#{Base64.encode64(body)}'></script>" if file =~ /\.js$/
     return "<link rel='stylesheet' href='data:text/css;base64,#{Base64.encode64(body)}' />" if file =~ /\.css$/
 
